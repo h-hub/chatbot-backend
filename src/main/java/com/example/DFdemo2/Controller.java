@@ -1,5 +1,8 @@
 package com.example.DFdemo2;
 
+import com.example.DFdemo2.model.Event;
+import com.example.DFdemo2.model.FulfillmentResponse;
+import com.example.DFdemo2.model.QueryText;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;

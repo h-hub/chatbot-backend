@@ -1,4 +1,4 @@
-package com.example.DFdemo2;
+package com.example.DFdemo2.model;
 
 import org.springframework.context.annotation.Configuration;
 
