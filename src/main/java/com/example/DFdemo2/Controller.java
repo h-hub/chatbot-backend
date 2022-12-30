@@ -31,11 +31,8 @@ public class Controller {
     @CrossOrigin
     @PostMapping("/api/df_text_query")
     @ResponseBody
-    Map<String, Object> textQuery(@RequestBody QueryText queryText) throws IOException {
-
-        Map<String, Object> rtn = new LinkedHashMap<>();
-        rtn.put("response", dialogFlowService.getTextIntentResponse(queryText.text));
-        return rtn;
+    FulfillmentResponse textQuery(@RequestBody QueryText queryText) throws IOException {
+        return dialogFlowService.getTextIntentResponse(queryText.text);
     }
 
     @CrossOrigin

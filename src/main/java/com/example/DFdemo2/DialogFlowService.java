@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class DialogFlowService {
@@ -32,7 +35,7 @@ public class DialogFlowService {
     private String privateKeyId;
 
 
-    public String getTextIntentResponse(String queryText) throws IOException {
+    public FulfillmentResponse getTextIntentResponse(String queryText) throws IOException {
 
         TextInput.Builder textInput =
                 TextInput.newBuilder().setText(queryText).setLanguageCode(langCode);
@@ -43,7 +46,7 @@ public class DialogFlowService {
 
     }
 
-    public String getEventIntentResponse(String event) throws IOException {
+    public FulfillmentResponse getEventIntentResponse(String event) throws IOException {
 
         EventInput eventInput = EventInput.newBuilder().setName(event).setLanguageCode(langCode).build();
 
@@ -53,7 +56,7 @@ public class DialogFlowService {
 
     }
 
-    private String getDullFillmentText(QueryInput queryInput) throws IOException {
+    private FulfillmentResponse getDullFillmentText(QueryInput queryInput) throws IOException {
         SessionName sessionName = SessionName.of(projectId, UUID.randomUUID().toString());
 
         String cleanedPrivateKeyPkcs8 = privateKeyPkcs8.replace("\\n", System.lineSeparator());
@@ -69,7 +72,21 @@ public class DialogFlowService {
 
         QueryResult queryResult = response.getQueryResult();
 
-        return queryResult.getFulfillmentText();
+        List<Cards> cardsList = new LinkedList<>();
+        if(queryResult.getFulfillmentMessagesCount() > 1){
+            cardsList = queryResult.getFulfillmentMessages(1).getPayload().getFieldsMap().get("cards").getListValue().getValuesList()
+                    .stream()
+                    .map(card -> new Cards(
+                            card.getStructValue().getFieldsMap().get("header").getStringValue(),
+                            card.getStructValue().getFieldsMap().get("description").getStringValue(),
+                            card.getStructValue().getFieldsMap().get("image").getStringValue(),
+                            card.getStructValue().getFieldsMap().get("link").getStringValue()))
+                    .collect(Collectors.toList());
+        }
+
+        FulfillmentResponse fulfillmentResponse = new FulfillmentResponse(queryResult.getFulfillmentText(), cardsList);
+
+        return fulfillmentResponse;
     }
 
 }
