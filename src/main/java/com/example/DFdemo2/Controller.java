@@ -35,7 +35,7 @@ public class Controller {
     @PostMapping("/api/df_text_query")
     @ResponseBody
     FulfillmentResponse textQuery(@RequestBody QueryText queryText) throws IOException {
-        return dialogFlowService.getTextIntentResponse(queryText.text);
+        return dialogFlowService.getTextIntentResponse(queryText.text, queryText.userId);
     }
 
     @CrossOrigin

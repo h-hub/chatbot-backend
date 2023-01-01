@@ -38,14 +38,14 @@ public class DialogFlowService {
     private String privateKeyId;
 
 
-    public FulfillmentResponse getTextIntentResponse(String queryText) throws IOException {
+    public FulfillmentResponse getTextIntentResponse(String queryText, String userId) throws IOException {
 
         TextInput.Builder textInput =
                 TextInput.newBuilder().setText(queryText).setLanguageCode(langCode);
 
         QueryInput queryInput = QueryInput.newBuilder().setText(textInput).build();
 
-        return getDullFillmentText(queryInput);
+        return getDullFillmentText(queryInput, userId);
 
     }
 
@@ -55,12 +55,12 @@ public class DialogFlowService {
 
         QueryInput queryInput = QueryInput.newBuilder().setEvent(eventInput).build();
 
-        return getDullFillmentText(queryInput);
+        return getDullFillmentText(queryInput, "");
 
     }
 
-    private FulfillmentResponse getDullFillmentText(QueryInput queryInput) throws IOException {
-        SessionName sessionName = SessionName.of(projectId, UUID.randomUUID().toString());
+    private FulfillmentResponse getDullFillmentText(QueryInput queryInput, String userId) throws IOException {
+        SessionName sessionName = SessionName.of(projectId, userId);
 
         String cleanedPrivateKeyPkcs8 = privateKeyPkcs8.replace("\\n", System.lineSeparator());
 
@@ -102,18 +102,21 @@ public class DialogFlowService {
 
         QuickReply quickReply = new QuickReply();
 
-        var fieldsMap = queryResult.getFulfillmentMessages(2).getPayload().getFieldsMap();
+        if(queryResult.getFulfillmentMessagesCount() > 2){
+            var fieldsMap = queryResult.getFulfillmentMessages(2).getPayload().getFieldsMap();
 
-        if(fieldsMap.containsKey("quick_replies")){
-            String text = fieldsMap.get("text").getStringValue();
-            List<QuickReply.Reply> quickReplies = fieldsMap.get("quick_replies").getListValue().getValuesList()
-                                                    .stream()
-                                                    .map(reply -> new QuickReply.Reply(
-                                                            reply.getStructValue().getFieldsMap().get("text").getStringValue(),
-                                                            reply.getStructValue().getFieldsMap().get("payload").getStringValue()))
-                                                    .collect(Collectors.toList());
-            quickReply.setText(text);
-            quickReply.setReplies(quickReplies);
+            if(fieldsMap.containsKey("quick_replies")){
+                String text = fieldsMap.get("text").getStringValue();
+                List<QuickReply.Reply> quickReplies = fieldsMap.get("quick_replies").getListValue().getValuesList()
+                        .stream()
+                        .map(reply -> new QuickReply.Reply(
+                                reply.getStructValue().getFieldsMap().get("text").getStringValue(),
+                                reply.getStructValue().getFieldsMap().get("payload").getStringValue()))
+                        .collect(Collectors.toList());
+                quickReply.setText(text);
+                quickReply.setReplies(quickReplies);
+            }
+
         }
 
         return quickReply;

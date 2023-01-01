@@ -4,4 +4,6 @@ public class QueryText {
 
     public String text;
 
+    public String userId;
+
 }
