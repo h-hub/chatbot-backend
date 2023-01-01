@@ -49,13 +49,13 @@ public class DialogFlowService {
 
     }
 
-    public FulfillmentResponse getEventIntentResponse(String event) throws IOException {
+    public FulfillmentResponse getEventIntentResponse(String event, String userId) throws IOException {
 
         EventInput eventInput = EventInput.newBuilder().setName(event).setLanguageCode(langCode).build();
 
         QueryInput queryInput = QueryInput.newBuilder().setEvent(eventInput).build();
 
-        return getDullFillmentText(queryInput, "");
+        return getDullFillmentText(queryInput, userId);
 
     }
 
